@@ -3,7 +3,10 @@ package com.foodies.foodieapp.controller;
 import com.foodies.foodieapp.model.Post;
 import com.foodies.foodieapp.services.PostServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,13 +35,26 @@ public class PostController {
         return ResponseEntity.ok(postServices.findPostsByTitle(title));
     }
 
+    @GetMapping("/my-posts")
+    public ResponseEntity<List<Post>> getMyPosts(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String userId = principal.getAttribute("sub");
+        List<Post> posts = postServices.getPostsByUserId(userId);
+        if (posts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(posts);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post post) {
         return ResponseEntity.ok(postServices.updatePost(id, post));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Post>> getPostsByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<Post>> getPostsByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(postServices.getPostsByUserId(userId));
     }
 }
