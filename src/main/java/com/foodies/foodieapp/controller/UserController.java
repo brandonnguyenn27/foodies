@@ -23,11 +23,27 @@ public class UserController {
         return ResponseEntity.ok(newUser);
     }
 
+    @PostMapping("/initialize")
+    public ResponseEntity<User> initializeUser(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        try {
+            User user = userServices.initializeUser(principal);
+            return ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable String id) {
         User user = userServices.getUserById(id);
         return ResponseEntity.ok(user);
     }
+
 
     @GetMapping("/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {

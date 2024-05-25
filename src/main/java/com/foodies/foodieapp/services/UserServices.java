@@ -32,6 +32,16 @@ public class UserServices {
         return userRepository.save(newUser);
     }
 
+    public User initializeUser(OAuth2User oAuth2User) {
+        if (oAuth2User == null || oAuth2User.getAttributes() == null) {
+            throw new IllegalArgumentException("Oauth2 user attributes cannot be null");
+        }
+        String oAuthId = oAuth2User.getAttribute("sub");
+        User newUser = userRepository.findById(oAuthId)
+                .orElseGet(() -> createUser(oAuth2User));
+        return userRepository.save(newUser);
+    }
+
     public User updateUser(String id, User user) {
         return userRepository.findById(id).map(existingUser -> {
             if (user.getUsername() != null) existingUser.setUsername(user.getUsername());
