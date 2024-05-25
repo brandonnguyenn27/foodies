@@ -3,6 +3,7 @@ package com.foodies.foodieapp.services;
 import com.foodies.foodieapp.model.User;
 import com.foodies.foodieapp.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,6 +17,19 @@ public class UserServices {
 
     public User createUser(User user) {
         return userRepository.save(user);
+    }
+
+    public User processsUserOAuthLogin(OAuth2User oAuth2User) {
+        String oAuthId = oAuth2User.getAttribute("sub");
+        return userRepository.findById(oAuthId)
+                .orElseGet(() -> createUser(oAuth2User));
+    }
+    public User createUser(OAuth2User oAuth2User) {
+        User newUser = new User();
+        newUser.setEmail(oAuth2User.getAttribute("email"));
+        newUser.setUsername(oAuth2User.getAttribute("name"));
+        newUser.setId(oAuth2User.getAttribute("sub"));
+        return userRepository.save(newUser);
     }
 
     public User updateUser(String id, User user) {

@@ -3,7 +3,10 @@ package com.foodies.foodieapp.controller;
 import com.foodies.foodieapp.model.User;
 import com.foodies.foodieapp.services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -30,6 +33,16 @@ public class UserController {
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
         User user = userServices.getUserByUsername(username);
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<User> getUserProfile(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        User user = userServices.processsUserOAuthLogin(principal);
+        return ResponseEntity.ok(user);
+
     }
 
 
