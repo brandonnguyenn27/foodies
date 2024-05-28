@@ -13,7 +13,7 @@ public class UserServices {
     @Autowired
     private UserRepository userRepository;
 
-    //need to create passwordEncoder util
+
 
     public User createUser(User user) {
         return userRepository.save(user);
@@ -45,7 +45,7 @@ public class UserServices {
     public User updateUser(String id, User user) {
         return userRepository.findById(id).map(existingUser -> {
             if (user.getUsername() != null) existingUser.setUsername(user.getUsername());
-            if (user.getPassword() != null) existingUser.setPassword(user.getPassword());
+            if(user.getId() != null) existingUser.setId(user.getId());
             if (user.getEmail() != null) existingUser.setEmail(user.getEmail());
             return userRepository.save(existingUser);
         }).orElseThrow(() -> new RuntimeException("User not found with id: " + id));
