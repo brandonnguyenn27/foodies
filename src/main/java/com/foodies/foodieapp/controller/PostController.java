@@ -20,9 +20,19 @@ public class PostController {
     private PostServices postServices;
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody Post post) {
-        return ResponseEntity.ok(postServices.createPost(post));
+    public ResponseEntity<Post> createPost(@AuthenticationPrincipal OAuth2User principal, @RequestBody Post post) {
+        if (principal == null || principal.getAttribute("sub") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String userId = principal.getAttribute("sub");
+        try {
+            Post createdPost = postServices.createPost(post, userId);
+            return ResponseEntity.ok(createdPost);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Optional<Post>> getPostById(@PathVariable Long id) {
